@@ -118,8 +118,8 @@ class Apptainer(Binary):
     def make_module_extra(self, *args, **kwargs):
         """Overwritten from Application to add extra txt"""
         # make sure Apptainer is in the dependencies
-        if 'Apptainer' not in [d['name'] for d in self.cfg.dependencies()]:
-            raise EasyBuildError("Apptainer not included as dependency")
+        #if 'Apptainer' not in [d['name'] for d in self.cfg.dependencies()]:
+        #    raise EasyBuildError("Apptainer not included as dependency")
 
         txt = super(Apptainer, self).make_module_extra(*args, **kwargs)
         for alias in self.cfg["aliases"]:
