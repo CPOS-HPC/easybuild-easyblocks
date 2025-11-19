@@ -124,8 +124,9 @@ class Apptainer(Binary):
         txt = super(Apptainer, self).make_module_extra(*args, **kwargs)
         for alias in self.cfg["aliases"]:
             bash_function = "apptainer exec %s %s %s \"$@\"" % (self.cfg["apptainer_params"], self.cfg["container_path"], alias)
-            csh_function = "apptainer exec %s %s %s $*" % (self.cfg["apptainer_params"], self.cfg["container_path"], alias)
-            txt += self.module_generator.set_shell_function(alias, bash_function, csh_function)
+        #    csh_function = "apptainer exec %s %s %s $*" % (self.cfg["apptainer_params"], self.cfg["container_path"], alias)
+        #    txt += self.module_generator.set_shell_function(alias, bash_function, csh_function)
+            txt += bash_function
         return txt
 
     def sanity_check_step(self):
