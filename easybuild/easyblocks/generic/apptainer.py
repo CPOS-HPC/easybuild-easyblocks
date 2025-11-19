@@ -35,10 +35,7 @@ import re
 from easybuild.easyblocks.generic.binary import Binary
 from easybuild.framework.easyconfig import CUSTOM
 from easybuild.tools.build_log import EasyBuildError
-from easybuild.tools.filetools import apply_regex_substitutions
-from easybuild.tools.filetools import copy_file, mkdir
 
-#DEFAULT_INSTALL_CMD = "/bin/sudo -iu containeruser build_container_image.sh -t sandbox "
 DEFAULT_INSTALL_CMD = "build_container_image.sh -t sandbox "
 class Apptainer(Binary):
     """
@@ -52,20 +49,26 @@ class Apptainer(Binary):
         extra_vars.update({
             'aliases': [[], "Commands to alias in the module.", CUSTOM],
             'apptainer_params': ["", "Default parameters for apptainer", CUSTOM],
-            'container_path': ["", "Path to the container that gets created", CUSTOM],
         })
         return extra_vars
 
     def __init__(self, *args, **kwargs):
         """Initialize custom class variables."""
         super(Apptainer, self).__init__(*args, **kwargs)
-        self.cfg['install_cmd'] = DEFAULT_INSTALL_CMD
+
         # do not prepend anything to path like binary does
         self.cfg['prepend_to_path'] = None
 
     def extract_step(self):
         """No extract step"""
-        pass
+        super(Apptainer, self).extract_step()
+
+    def install_step(self):
+        # Set the installation command
+        self.cfg['install_cmd'] = DEFAULT_INSTALL_CMD + '-n ' + self.name.lower() + ' -v ' + self.version + ' '
+        self.cfg['install_cmd'] += "-o " + self.installdir + ' '
+
+        super(Apptainer, self).install_step()
 
     def make_module_req(self):
         """
@@ -73,60 +76,14 @@ class Apptainer(Binary):
         """
         return ""
 
-    def make_devel_module(self, create_in_builddir=False):
-        """
-        Make sure the easybuild directory is created in easybuild space
-        NOTE TO FUTURE READER: don't ask me why this method is what defines where the easybuild directory is created
-        """
-        newinstalldir = self.installdir
-        self.installdir = self.orig_installdir
-        res = super(Apptainer, self).make_devel_module(create_in_builddir)
-        self.installdir = newinstalldir
-        return res
-
-    def make_module_step(self, fake=False):
-        """
-        Custom module step for Apptainer: use container path directly
-        """
-        # For module file generation: temporarly set the container path as installdir
-        self.orig_installdir = self.installdir
-        if self.cfg['container_path'] is not None:
-            self.installdir = self.cfg["container_path"]
-
-        # Generate module
-        res = super(Apptainer, self).make_module_step(fake=fake)
-
-
-        # create a secondary module
-        modname = os.path.basename(os.path.dirname(self.mod_filepath))
-        modversion = os.path.basename(self.mod_filepath)
-
-        secondary_module_path = os.path.join(os.path.dirname(os.path.dirname(self.cfg['container_path'])), 'modules', modname)
-        # create module directory if it does not exist
-        mkdir(secondary_module_path)
-        copy_file(self.mod_filepath, secondary_module_path)
-        secondary_module = os.path.join(secondary_module_path, modversion)
-
-        # remove depends_on("apptainer.*") for this module
-        regex_subs = [(r'depends_on\("apptainer.*"\)', r'')]
-        apply_regex_substitutions(secondary_module, regex_subs)
-
-        # Reset installdir to EasyBuild values
-        self.installdir = self.orig_installdir
-        return res
-
     def make_module_extra(self, *args, **kwargs):
         """Overwritten from Application to add extra txt"""
-        # make sure Apptainer is in the dependencies
-        #if 'Apptainer' not in [d['name'] for d in self.cfg.dependencies()]:
-        #    raise EasyBuildError("Apptainer not included as dependency")
+
+        container_path = self.installdir + '/' + self.name.lower() + '-' + self.version
 
         txt = super(Apptainer, self).make_module_extra(*args, **kwargs)
         for alias in self.cfg["aliases"]:
-            bash_function = "apptainer exec %s %s %s \"$@\"" % (self.cfg["apptainer_params"], self.cfg["container_path"], alias)
-            csh_function = "apptainer exec %s %s %s $*" % (self.cfg["apptainer_params"], self.cfg["container_path"], alias)
-        #    txt += self.module_generator.set_shell_function(alias, bash_function, csh_function)
-            txt += "set_shell_function(%s, %s, %s)\n" % (alias, bash_function, csh_function)
+            txt += self.module_generator.set_alias(alias, "apptainer exec %s %s %s" % (self.cfg["apptainer_params"], container_path, alias))
         return txt
 
     def sanity_check_step(self):
@@ -135,13 +92,12 @@ class Apptainer(Binary):
         """
 
         # For module file generation: temporarly set installdir to container path
-        self.orig_installdir = self.installdir
-        self.installdir = self.cfg["container_path"]
+        orig_installdir = self.installdir
+        self.installdir += '/' + self.name.lower() + '-' + self.version
 
         # sanity check
         res = super(Apptainer, self).sanity_check_step()
 
         # Reset installdir to EasyBuild values
-        self.installdir = self.orig_installdir
+        self.installdir = orig_installdir
         return res
-
