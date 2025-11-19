@@ -38,7 +38,8 @@ from easybuild.tools.build_log import EasyBuildError
 from easybuild.tools.filetools import apply_regex_substitutions
 from easybuild.tools.filetools import copy_file, mkdir
 
-DEFAULT_INSTALL_CMD = "/bin/sudo -iu containeruser build_container_image.sh -t sandbox "
+#DEFAULT_INSTALL_CMD = "/bin/sudo -iu containeruser build_container_image.sh -t sandbox "
+DEFAULT_INSTALL_CMD = "build_container_image.sh -t sandbox "
 class Apptainer(Binary):
     """
     Support for installing software via an Apptainer container
