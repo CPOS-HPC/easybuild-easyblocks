@@ -61,7 +61,8 @@ class Apptainer(Binary):
 
     def extract_step(self):
         """No extract step"""
-        super(Apptainer, self).extract_step()
+        if self.src:
+            super(Apptainer, self).extract_step()
 
     def install_step(self):
         # Set the installation command
