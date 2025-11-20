@@ -91,13 +91,13 @@ class Apptainer(Binary):
         
         # Set container_path based on type
         if apptainer_type == 'sif':
-            apptainer_exec = container_path + self.name.lower() + '-' + self.version + '.sif'
+            container_image = container_path + self.name.lower() + '-' + self.version + '.sif'
         else:  # sandbox
-            apptainer_exec = '-c ' + container_path
+            container_image = '-c ' + container_path
 
         txt = super(Apptainer, self).make_module_extra(*args, **kwargs)
         for alias in self.cfg["aliases"]:
-            txt += self.module_generator.set_alias(alias, "apptainer exec %s %s" % (apptainer_exec, alias))
+            txt += self.module_generator.set_alias(alias, "apptainer exec %s %s %s" % (self.cfg['apptainer_params'], container_image, alias))
         return txt
 
     def sanity_check_step(self):
