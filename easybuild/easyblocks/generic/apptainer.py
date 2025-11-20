@@ -105,13 +105,18 @@ class Apptainer(Binary):
         Custom sanity check step for Apptainer: check that aliases run
         """
 
-        # For module file generation: temporarly set installdir to container path
-        orig_installdir = self.installdir
-        self.installdir += '/' + self.name.lower() + '-' + self.version
+        apptainer_type = self.cfg['apptainer_type']
+        # For module file generation: temporarly set installdir to container path for sandbox
+        if apptainer_type == 'sandbox':
+            orig_installdir = self.installdir
+            self.installdir += '/' + self.name.lower() + '-' + self.version
 
-        # sanity check
-        res = super(Apptainer, self).sanity_check_step()
+            # sanity check
+            res = super(Apptainer, self).sanity_check_step()
 
-        # Reset installdir to EasyBuild values
-        self.installdir = orig_installdir
+            # Reset installdir to EasyBuild values
+            self.installdir = orig_installdir
+        else: # sif file
+            res = super(Apptainer, self).sanity_check_step()
+
         return res
