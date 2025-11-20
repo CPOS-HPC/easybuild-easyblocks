@@ -74,12 +74,6 @@ class Apptainer(Binary):
 
         super(Apptainer, self).install_step()
 
-    def make_module_req(self):
-        """
-        Don't extend PATH/LIBRARY_PATH/etc.
-        """
-        return ""
-
     def make_module_extra(self, *args, **kwargs):   
         """Overwritten from Application to add extra txt"""
         
