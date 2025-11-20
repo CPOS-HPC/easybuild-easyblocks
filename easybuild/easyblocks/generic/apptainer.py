@@ -75,9 +75,9 @@ class Apptainer(Binary):
         self.cfg['install_cmd'] += '-n ' + self.name.lower() + ' -v ' + self.version + ' '
         
         if apptainer_type == 'sif':
-            self.cfg['install_cmd'] += "-o " + self.installdir + self.name.lower() + '-' + self.version + '.sif '
+            self.cfg['install_cmd'] += "-o " + self.installdir + '/' + self.name.lower() + '-' + self.version + '.sif '
         else:  # sandbox
-            self.cfg['install_cmd'] += "-o " + self.installdir + self.name.lower() + '-' + self.version + ' '
+            self.cfg['install_cmd'] += "-o " + self.installdir + ' '
 
         super(Apptainer, self).install_step()
 
@@ -87,15 +87,15 @@ class Apptainer(Binary):
         """
         return ""
 
-    def make_module_extra(self, *args, **kwargs):
+    def make_module_extra(self, *args, **kwargs):   
         """Overwritten from Application to add extra txt"""
         
         apptainer_type = self.cfg['apptainer_type']
-        container_path = self.installdir + '/' + self.name.lower() + '-' + self.version
+        container_path = self.installdir + '/' 
         
-        # Set container_image based on type
+        # Set container_path based on type
         if apptainer_type == 'sif':
-            apptainer_exec = container_path + '.sif'
+            apptainer_exec = container_path + self.name.lower() + '-' + self.version + '.sif'
         else:  # sandbox
             apptainer_exec = '-c ' + container_path
 
