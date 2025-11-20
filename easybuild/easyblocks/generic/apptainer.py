@@ -39,6 +39,7 @@ from easybuild.framework.easyconfig import CUSTOM
 from easybuild.tools.build_log import EasyBuildError
 
 DEFAULT_INSTALL_CMD = "build_container_image.sh "
+PREPEND_TO_PATH_DEFAULT = ['']
 class Apptainer(Binary):
     """
     Support for installing software via an Apptainer container
@@ -52,6 +53,9 @@ class Apptainer(Binary):
             'aliases': [[], "Commands to alias in the module.", CUSTOM],
             'apptainer_params': ["", "Default parameters for apptainer", CUSTOM],
             'apptainer_type': ["", "Type of apptainer installation (sandbox or sif)", CUSTOM],
+            'prepend_to_path': [PREPEND_TO_PATH_DEFAULT, "Prepend the given directories (relative to install-dir) to "
+                                                         "the environment variable PATH in the module file. Default "
+                                                         "is the install-dir itself.", CUSTOM],
         })
         return extra_vars
 
@@ -59,8 +63,11 @@ class Apptainer(Binary):
         """Initialize custom class variables."""
         super(Apptainer, self).__init__(*args, **kwargs)
 
-        # do not prepend anything to path like binary does
-        self.cfg['prepend_to_path'] = None
+        prepend_to_path = self.cfg.get('prepend_to_path', PREPEND_TO_PATH_DEFAULT)
+        if isinstance(prepend_to_path, str):
+            prepend_to_path = [prepend_to_path]
+        if prepend_to_path:
+            self.module_load_environment.PATH.extend(prepend_to_path)
 
     def extract_step(self):
         """No extract step"""
