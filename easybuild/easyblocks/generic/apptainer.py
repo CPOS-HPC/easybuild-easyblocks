@@ -73,11 +73,7 @@ class Apptainer(Binary):
         
         self.cfg['install_cmd'] = DEFAULT_INSTALL_CMD + '-t ' + apptainer_type + ' '
         self.cfg['install_cmd'] += '-n ' + self.name.lower() + ' -v ' + self.version + ' '
-        
-        if apptainer_type == 'sif':
-            self.cfg['install_cmd'] += "-o " + self.installdir + '/' + self.name.lower() + '-' + self.version + '.sif '
-        else:  # sandbox
-            self.cfg['install_cmd'] += "-o " + self.installdir + ' '
+        self.cfg['install_cmd'] += "-o " + self.installdir + ' '
 
         super(Apptainer, self).install_step()
 
