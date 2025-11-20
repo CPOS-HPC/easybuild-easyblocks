@@ -27,8 +27,10 @@
 ##
 """
 General EasyBuild support for software, using containerized applications
+Based on https://gitrepo.service.rug.nl/cit-hpc/habrok/cit-hpc-easybuild/-/blob/main/easyblocks/generic/apptainer.py
 
 @author: Maxime Boissonneault (Universite Laval, Calcul Quebec, Digital Research Alliance of Canada)
+@author: Aurel Istrate (c.a.istrate@rug.nl)
 """
 import os
 import re
@@ -36,7 +38,7 @@ from easybuild.easyblocks.generic.binary import Binary
 from easybuild.framework.easyconfig import CUSTOM
 from easybuild.tools.build_log import EasyBuildError
 
-DEFAULT_INSTALL_CMD = "build_container_image.sh -t sandbox "
+DEFAULT_INSTALL_CMD = "build_container_image.sh "
 class Apptainer(Binary):
     """
     Support for installing software via an Apptainer container
@@ -49,6 +51,7 @@ class Apptainer(Binary):
         extra_vars.update({
             'aliases': [[], "Commands to alias in the module.", CUSTOM],
             'apptainer_params': ["", "Default parameters for apptainer", CUSTOM],
+            'apptainer_type': ["", "Type of apptainer installation (sandbox or sif)", CUSTOM],
         })
         return extra_vars
 
@@ -66,8 +69,15 @@ class Apptainer(Binary):
 
     def install_step(self):
         # Set the installation command
-        self.cfg['install_cmd'] = DEFAULT_INSTALL_CMD + '-n ' + self.name.lower() + ' -v ' + self.version + ' '
-        self.cfg['install_cmd'] += "-o " + self.installdir + ' '
+        apptainer_type = self.cfg['apptainer_type']
+        
+        self.cfg['install_cmd'] = DEFAULT_INSTALL_CMD + '-t ' + apptainer_type + ' '
+        self.cfg['install_cmd'] += '-n ' + self.name.lower() + ' -v ' + self.version + ' '
+        
+        if apptainer_type == 'sif':
+            self.cfg['install_cmd'] += "-o " + self.installdir + self.name.lower() + '-' + self.version + '.sif '
+        else:  # sandbox
+            self.cfg['install_cmd'] += "-o " + self.installdir + self.name.lower() + '-' + self.version + ' '
 
         super(Apptainer, self).install_step()
 
@@ -79,12 +89,19 @@ class Apptainer(Binary):
 
     def make_module_extra(self, *args, **kwargs):
         """Overwritten from Application to add extra txt"""
-
+        
+        apptainer_type = self.cfg['apptainer_type']
         container_path = self.installdir + '/' + self.name.lower() + '-' + self.version
+        
+        # Set container_image based on type
+        if apptainer_type == 'sif':
+            apptainer_exec = container_path + '.sif'
+        else:  # sandbox
+            apptainer_exec = '-c ' + container_path
 
         txt = super(Apptainer, self).make_module_extra(*args, **kwargs)
         for alias in self.cfg["aliases"]:
-            txt += self.module_generator.set_alias(alias, "apptainer exec %s %s %s" % (self.cfg["apptainer_params"], container_path, alias))
+            txt += self.module_generator.set_alias(alias, "apptainer exec %s %s" % (apptainer_exec, alias))
         return txt
 
     def sanity_check_step(self):
