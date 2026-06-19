@@ -1,5 +1,5 @@
 ##
-# Copyright 2013-2025 Ghent University
+# Copyright 2013-2026 Ghent University
 #
 # This file is part of EasyBuild,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -73,7 +73,7 @@ class EB_FDTD_underscore_Solutions(PackedBinary):
             else:
                 raise EasyBuildError("Failed to isolate top-level directory using %s", top_dir_glob)
 
-        copy_dir(top_dir, self.installdir, symlinks=self.cfg['keepsymlinks'])
+        copy_dir(top_dir, self.installdir, symlinks=self.cfg['keepsymlinks'], dirs_exist_ok=True)
 
     def sanity_check_step(self):
         """Custom sanity check for FDTD Solutions."""

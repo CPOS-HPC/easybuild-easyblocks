@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##
-# Copyright 2009-2025 Ghent University
+# Copyright 2009-2026 Ghent University
 #
 # This file is part of EasyBuild,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -172,8 +172,11 @@ KOKKOS_GPU_ARCH_TABLE = {
     '8.6': 'AMPERE86',  # NVIDIA Ampere generation CC 8.6
     '8.9': 'ADA89',  # NVIDIA Ada Lovelace generation CC 8.9
     '9.0': 'HOPPER90',  # NVIDIA Hopper generation CC 9.0
+    '9.0a': 'HOPPER90',  # NVIDIA Hopper generation cc 9.0 with family-specific optimization
     '10.0': 'BLACKWELL100',  # NVIDIA Blackwell generation CC 10.0
+    '10.0f': 'BLACKWELL100',  # # NVIDIA Blackwell generation CC 10.0 with family-specific optimization
     '12.0': 'BLACKWELL120',  # NVIDIA Blackwell generation CC 12.0
+    '12.0f': 'BLACKWELL120',  # NVIDIA Blackwell generation CC 12.0 with family-specific optimization
 }
 
 # lammps version, which caused the most changes. This may not be precise, but it does work with existing easyconfigs

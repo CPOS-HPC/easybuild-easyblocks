@@ -1,7 +1,7 @@
 ##
 # This file is an EasyBuild reciPY as per https://github.com/easybuilders/easybuild
 #
-# Copyright:: Copyright 2012-2025 Uni.Lu/LCSB, NTUA
+# Copyright:: Copyright 2012-2026 Uni.Lu/LCSB, NTUA
 # Authors::   Cedric Laczny <cedric.laczny@uni.lu>, Fotis Georgatos <fotis@cern.ch>, Kenneth Hoste
 # License::   MIT/GPL
 # $Id$
@@ -91,6 +91,13 @@ class EB_SAMtools(ConfigureMake):
         for var in ['CC', 'CXX', 'CFLAGS', 'CXXFLAGS']:
             if var in os.environ:
                 self.cfg.update('buildopts', '%s="%s"' % (var, os.getenv(var)))
+
+        # also specify ncursesw libraries to link to,
+        # to avoid that detection of ncurses/ncursesw is broken due to error like:
+        #     error adding symbols: DSO missing from command line
+        # only really required when ncurses was configured in a particular way,
+        # see also https://bugs.gentoo.org/457530
+        self.cfg.update('configopts', 'CURSES_LIB="$(pkgconf --libs ncursesw)"')
 
         # configuring with --prefix only supported with v1.3 and more recent
         if LooseVersion(self.version) >= LooseVersion('1.3'):

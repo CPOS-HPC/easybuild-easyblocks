@@ -1,5 +1,5 @@
 ##
-# Copyright 2009-2025 Ghent University
+# Copyright 2009-2026 Ghent University
 #
 # This file is part of EasyBuild,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -65,7 +65,7 @@ class EB_MUMPS(ConfigureMake):
             make_inc_templ = 'Makefile.INTEL.%s'
             optf = "-Dintel_ -DALLOW_NON_INIT -nofor-main"
             optl = "%s -nofor-main" % optl
-        elif comp_fam == toolchain.GCC:  # @UndefinedVariable
+        elif comp_fam in [toolchain.GCC, toolchain.LLVM]:  # @UndefinedVariable
             if LooseVersion(self.version) >= LooseVersion('5.0.0'):
                 make_inc_templ = 'Makefile.debian.%s'
             else:

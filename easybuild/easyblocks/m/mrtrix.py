@@ -1,5 +1,5 @@
 ##
-# Copyright 2009-2025 Ghent University
+# Copyright 2009-2026 Ghent University
 #
 # This file is part of EasyBuild,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -68,7 +68,7 @@ class EB_MRtrix(EasyBlock):
                 env.setvar('LDLIB', "%s -shared LDLIB_FLAGS OBJECTS -o LIB" % os.getenv('CXX'))
 
             env.setvar('QMAKE_CXX', os.getenv('CXX'))
-            cmd = "python configure -verbose"
+            cmd = "python configure -verbose " + self.cfg['configopts']
 
             run_shell_cmd(cmd)
 

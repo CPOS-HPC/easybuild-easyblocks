@@ -1,5 +1,5 @@
 ##
-# Copyright 2021-2025 Ghent University
+# Copyright 2021-2026 Ghent University
 #
 # This file is part of EasyBuild,
 # originally created by the HPC team of Ghent University (http://ugent.be/hpc/en),
@@ -78,6 +78,11 @@ class EB_torchvision(PythonPackage):
                 includes.append(os.path.join(libroot, 'include'))
         if includes:
             env.setvar('TORCHVISION_INCLUDE', os.path.pathsep.join(includes))
+
+        # Set environment variable that skips tests that require authentication with wikimedia
+        # See https://github.com/pytorch/vision/issues/9413
+        if self.cfg['runtest']:
+            env.setvar('CIRCLECI', 'true')
 
         super().configure_step()
 
