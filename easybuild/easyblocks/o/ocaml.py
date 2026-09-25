@@ -121,7 +121,13 @@ class EB_OCaml(ConfigureMake):
             self.with_opam = True
             change_dir(opam_dir)
 
-            run_shell_cmd("./configure --prefix=%s" % self.installdir)
+            opam_configure_cmd = "./configure --prefix=%s" % self.installdir
+            configure_help = run_shell_cmd("./configure --help", fail_on_error=False)
+
+            if '--with-vendored-deps' in configure_help.output:
+                opam_configure_cmd += " --with-vendored-deps"
+
+            run_shell_cmd(opam_configure_cmd)
             run_shell_cmd("make lib-ext")  # locally build/install required dependencies
             run_shell_cmd("make")
             run_shell_cmd("make install")
